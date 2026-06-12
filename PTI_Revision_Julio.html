@@ -1,0 +1,753 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Revisión de Parrilla — PTI Julio</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+:root {
+  --green-light:#E1F5EE;--green-mid:#1D9E75;--green-dark:#0F6E56;--green-text:#085041;
+  --amber-light:#FEF3DC;--amber-mid:#E59A1A;--amber-dark:#B97A12;--amber-text:#6B4508;
+  --blue-light:#E6F1FB;--blue-mid:#378ADD;--blue-text:#0C447C;
+  --purple-light:#F0EBFF;--purple-mid:#7C5CBF;--purple-text:#3D2070;
+  --gray-50:#F7F7F5;--gray-100:#EFEFEC;--gray-200:#DDDDD8;
+  --gray-400:#9E9E97;--gray-700:#3E3E3A;--gray-900:#1A1A18;
+  --radius-sm:6px;--radius-md:10px;--radius-lg:16px;
+}
+body { font-family:'Inter',system-ui,sans-serif; background:var(--gray-50); color:var(--gray-900); min-height:100vh; }
+
+/* HEADER */
+.header { background:#fff; border-bottom:1px solid var(--gray-200); padding:.875rem 1.25rem; display:flex; align-items:center; justify-content:space-between; position:sticky; top:0; z-index:20; }
+.header-logo { display:flex; align-items:center; gap:10px; }
+.logo-mark { width:34px; height:34px; background:var(--green-mid); border-radius:var(--radius-sm); display:flex; align-items:center; justify-content:center; color:#fff; font-weight:700; font-size:13px; }
+.header-title { font-size:14px; font-weight:600; color:var(--gray-900); line-height:1.2; }
+.header-sub { font-size:11px; color:var(--gray-400); }
+.header-right { display:flex; align-items:center; gap:8px; }
+.header-counter { font-size:12px; color:var(--gray-400); font-weight:500; }
+.btn-reset { padding:5px 10px; border-radius:var(--radius-sm); border:1px solid var(--gray-200); background:#fff; color:var(--gray-400); font-size:11px; font-weight:500; font-family:inherit; cursor:pointer; display:flex; align-items:center; gap:4px; transition:background .12s,color .12s; }
+.btn-reset:hover { background:var(--gray-100); color:var(--gray-700); }
+
+/* SYNC INDICATOR */
+.sync-dot { width:7px; height:7px; border-radius:50%; background:var(--gray-200); display:inline-block; transition:background .3s; }
+.sync-dot.syncing { background:var(--amber-mid); animation:pulse 1s infinite; }
+.sync-dot.synced  { background:var(--green-mid); }
+.sync-dot.error   { background:#E2534A; }
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:.4} }
+.sync-label { font-size:11px; color:var(--gray-400); display:flex; align-items:center; gap:5px; }
+
+/* TABS */
+.tabs-wrap { background:#fff; border-bottom:1px solid var(--gray-200); display:flex; padding:0 1.25rem; position:sticky; top:61px; z-index:19; overflow-x:auto; }
+.tab { padding:11px 14px; font-size:13px; font-weight:500; color:var(--gray-400); border-bottom:2px solid transparent; cursor:pointer; display:flex; align-items:center; gap:6px; white-space:nowrap; transition:color .15s,border-color .15s; background:none; border-top:none; border-left:none; border-right:none; font-family:inherit; }
+.tab:hover { color:var(--gray-700); }
+.tab.active { color:var(--green-dark); border-bottom-color:var(--green-mid); font-weight:600; }
+.tab-badge { font-size:10px; font-weight:700; padding:1px 6px; border-radius:20px; background:var(--gray-100); color:var(--gray-400); }
+.tab.active .tab-badge { background:var(--green-light); color:var(--green-dark); }
+
+/* PROGRESS */
+.progress-wrap { background:#fff; padding:0 1.25rem .65rem; }
+.progress-track { height:4px; background:var(--gray-100); border-radius:10px; overflow:hidden; }
+.progress-fill { height:100%; background:linear-gradient(90deg,var(--green-mid),#2BBFA0); border-radius:10px; transition:width .4s ease; }
+
+/* PANELS */
+.panel { display:none; }
+.panel.active { display:block; }
+.main { max-width:640px; margin:0 auto; padding:1.25rem 1rem 4rem; }
+
+/* CARD */
+.card { background:#fff; border-radius:var(--radius-lg); border:1px solid var(--gray-200); overflow:hidden; margin-bottom:1rem; }
+.card-header { padding:1.1rem 1.25rem .9rem; border-bottom:1px solid var(--gray-100); }
+.card-meta { display:flex; align-items:center; gap:8px; margin-bottom:8px; flex-wrap:wrap; }
+.badge { display:inline-flex; align-items:center; gap:4px; font-size:11px; font-weight:600; padding:3px 9px; border-radius:20px; letter-spacing:.02em; }
+.badge-id { background:var(--gray-100); color:var(--gray-400); }
+.badge-formato { background:var(--blue-light); color:var(--blue-text); }
+.badge-cultivo { background:var(--green-light); color:var(--green-text); }
+.badge-producto { background:var(--amber-light); color:var(--amber-text); }
+.badge-encuesta { background:var(--purple-light); color:var(--purple-text); }
+.card-tema { font-size:18px; font-weight:600; color:var(--gray-900); line-height:1.3; }
+.card-body { padding:1rem 1.25rem; }
+.section-label { font-size:10px; font-weight:600; letter-spacing:.08em; text-transform:uppercase; color:var(--gray-400); margin:12px 0 6px; }
+.section-label:first-child { margin-top:0; }
+.badges-row { display:flex; flex-wrap:wrap; gap:6px; }
+.guion-box { background:var(--gray-50); border:1px solid var(--gray-100); border-radius:var(--radius-md); padding:10px 12px; font-size:13px; color:var(--gray-700); line-height:1.65; max-height:110px; overflow-y:auto; }
+
+/* ENCUESTA */
+.encuesta-panel { background:var(--purple-light); border:1.5px solid var(--purple-mid); border-radius:var(--radius-md); padding:10px 12px; margin-top:10px; }
+.encuesta-label { font-size:11px; font-weight:600; color:var(--purple-text); margin-bottom:6px; text-transform:uppercase; letter-spacing:.06em; }
+.encuesta-input { width:100%; padding:8px 10px; font-size:13px; font-family:inherit; border:1px solid #C9B8F0; border-radius:var(--radius-sm); background:#fff; color:var(--gray-900); outline:none; }
+.encuesta-input:focus { border-color:var(--purple-mid); box-shadow:0 0 0 3px rgba(124,92,191,.15); }
+
+/* BUTTONS */
+.btn-row { display:flex; gap:8px; padding:1rem 1.25rem; background:#fff; border-top:1px solid var(--gray-100); }
+.btn { flex:1; padding:12px 8px; border-radius:var(--radius-md); border:1.5px solid var(--gray-200); background:#fff; cursor:pointer; font-size:13px; font-weight:600; font-family:inherit; display:flex; align-items:center; justify-content:center; gap:7px; transition:background .12s,border-color .12s,transform .08s; -webkit-tap-highlight-color:transparent; }
+.btn:active { transform:scale(.97); }
+.btn-ok { border-color:var(--green-mid); color:var(--green-dark); background:var(--green-light); }
+.btn-ok:hover { background:#C4EDD9; border-color:var(--green-dark); }
+.btn-cambio { border-color:var(--amber-mid); color:var(--amber-dark); background:var(--amber-light); }
+.btn-cambio:hover { background:#FDEBC0; border-color:var(--amber-dark); }
+.btn-skip { flex:0 0 48px; color:var(--gray-400); }
+.btn-skip:hover { background:var(--gray-100); }
+.btn:disabled { opacity:.5; cursor:not-allowed; }
+
+/* NAV ROW */
+.nav-row { display:flex; align-items:center; justify-content:space-between; gap:8px; padding:.65rem 1.25rem; border-top:1px solid var(--gray-100); background:var(--gray-50); }
+.btn-nav { display:flex; align-items:center; gap:5px; padding:7px 12px; border-radius:var(--radius-md); border:1.5px solid var(--gray-200); background:#fff; color:var(--gray-700); font-size:12px; font-weight:500; font-family:inherit; cursor:pointer; transition:background .12s; }
+.btn-nav:hover { background:var(--gray-100); }
+.btn-nav:disabled { opacity:.35; cursor:default; pointer-events:none; }
+.nav-status { font-size:12px; color:var(--gray-400); display:flex; align-items:center; gap:5px; }
+.status-dot { display:inline-block; width:8px; height:8px; border-radius:50%; background:var(--gray-200); }
+.status-dot.ok { background:var(--green-mid); }
+.status-dot.cambio { background:var(--amber-mid); }
+.status-dot.skip { background:var(--gray-400); }
+
+/* CHANGE PANEL */
+.change-panel { display:none; margin:0 1.25rem 1.25rem; border:1.5px solid var(--amber-mid); background:var(--amber-light); border-radius:var(--radius-md); padding:1rem; animation:slideDown .2s ease; }
+@keyframes slideDown { from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:translateY(0)} }
+.change-panel-title { font-size:13px; font-weight:600; color:var(--amber-text); margin-bottom:10px; }
+.chk-options { display:flex; flex-direction:column; gap:8px; margin-bottom:10px; }
+.chk-row { display:flex; align-items:flex-start; gap:9px; font-size:13px; color:var(--gray-900); cursor:pointer; line-height:1.4; }
+.chk-row input[type=checkbox] { width:16px; height:16px; margin-top:1px; accent-color:var(--amber-mid); flex-shrink:0; }
+textarea { width:100%; padding:9px 11px; font-size:13px; font-family:inherit; border:1px solid var(--gray-200); border-radius:var(--radius-sm); background:#fff; color:var(--gray-900); resize:vertical; line-height:1.5; }
+textarea:focus { outline:none; border-color:var(--amber-mid); box-shadow:0 0 0 3px rgba(229,154,26,.15); }
+textarea::placeholder { color:var(--gray-400); }
+.btn-confirm { width:100%; margin-top:10px; padding:11px; border-radius:var(--radius-md); background:var(--amber-mid); color:#fff; border:none; cursor:pointer; font-size:13px; font-weight:600; font-family:inherit; transition:background .12s; }
+.btn-confirm:hover { background:var(--amber-dark); }
+
+/* DONE SCREEN */
+.done-screen { text-align:center; padding:2rem 0 1rem; }
+.done-icon { width:60px; height:60px; background:var(--green-light); border-radius:50%; display:flex; align-items:center; justify-content:center; margin:0 auto 1rem; font-size:28px; }
+.done-h { font-size:20px; font-weight:600; margin-bottom:6px; }
+.done-p { font-size:14px; color:var(--gray-400); margin-bottom:1.5rem; }
+.stats-row { display:flex; gap:10px; justify-content:center; margin-bottom:1.5rem; }
+.stat-box { padding:12px 18px; border-radius:var(--radius-md); text-align:center; min-width:85px; }
+.stat-box .num { font-size:24px; font-weight:700; }
+.stat-box .lbl { font-size:11px; font-weight:500; margin-top:2px; }
+.stat-ok { background:var(--green-light); color:var(--green-text); }
+.stat-cambio { background:var(--amber-light); color:var(--amber-text); }
+.stat-skip { background:var(--gray-100); color:var(--gray-400); }
+.summary-card { background:#fff; border:1px solid var(--gray-200); border-radius:var(--radius-lg); overflow:hidden; text-align:left; margin-bottom:1.5rem; }
+.summary-header { padding:9px 14px; background:var(--gray-50); font-size:11px; font-weight:600; letter-spacing:.06em; text-transform:uppercase; color:var(--gray-400); border-bottom:1px solid var(--gray-200); }
+.summary-item { padding:10px 14px; border-bottom:1px solid var(--gray-100); font-size:13px; }
+.summary-item:last-child { border-bottom:none; }
+.s-label { display:inline-block; font-size:10px; font-weight:700; letter-spacing:.05em; text-transform:uppercase; padding:2px 7px; border-radius:20px; margin-right:6px; }
+.s-cambio { background:var(--amber-light); color:var(--amber-text); }
+.s-skip { background:var(--gray-100); color:var(--gray-400); }
+.s-tema { font-weight:600; color:var(--gray-900); }
+.s-id { color:var(--gray-400); font-size:11px; margin-left:4px; }
+.s-tipo { font-size:12px; color:var(--gray-400); margin-top:3px; }
+.s-nota { font-size:13px; color:var(--gray-700); margin-top:3px; background:var(--gray-50); padding:6px 8px; border-radius:var(--radius-sm); }
+.export-row { display:flex; gap:8px; justify-content:center; flex-wrap:wrap; }
+.btn-export { padding:11px 20px; background:var(--green-mid); color:#fff; border:none; border-radius:var(--radius-md); font-size:13px; font-weight:600; font-family:inherit; cursor:pointer; transition:background .12s; display:flex; align-items:center; gap:7px; }
+.btn-export:hover { background:var(--green-dark); }
+.btn-restart { padding:11px 18px; background:#fff; color:var(--gray-700); border:1.5px solid var(--gray-200); border-radius:var(--radius-md); font-size:13px; font-weight:600; font-family:inherit; cursor:pointer; }
+.btn-restart:hover { background:var(--gray-100); }
+
+/* RESUMEN */
+.resumen-section { margin-bottom:1.5rem; }
+.resumen-title { font-size:13px; font-weight:700; color:var(--gray-900); margin-bottom:10px; display:flex; align-items:center; gap:8px; }
+.resumen-title span { font-size:18px; }
+.bar-row { display:flex; align-items:center; gap:10px; margin-bottom:8px; }
+.bar-label { font-size:12px; font-weight:500; color:var(--gray-700); min-width:130px; max-width:130px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.bar-track { flex:1; height:10px; background:var(--gray-100); border-radius:10px; overflow:hidden; }
+.bar-fill { height:100%; border-radius:10px; transition:width .6s ease; }
+.bar-count { font-size:12px; font-weight:700; color:var(--gray-700); min-width:24px; text-align:right; }
+.bar-fill-producto { background:linear-gradient(90deg,var(--amber-mid),#F0B429); }
+.bar-fill-cultivo { background:linear-gradient(90deg,var(--green-mid),#2BBFA0); }
+.bar-fill-tema { background:linear-gradient(90deg,var(--blue-mid),#5AAFE8); }
+.resumen-card { background:#fff; border:1px solid var(--gray-200); border-radius:var(--radius-lg); padding:1.1rem 1.25rem; margin-bottom:1rem; }
+.formato-grid { display:grid; grid-template-columns:repeat(2,1fr); gap:8px; }
+.formato-item { background:var(--gray-50); border-radius:var(--radius-md); padding:10px 12px; display:flex; align-items:center; gap:10px; }
+.formato-icon-wrap { width:32px; height:32px; border-radius:var(--radius-sm); display:flex; align-items:center; justify-content:center; flex-shrink:0; }
+.formato-num { font-size:18px; font-weight:700; color:var(--gray-900); }
+.formato-lbl { font-size:11px; color:var(--gray-400); font-weight:500; }
+
+/* COMENTARIOS */
+.comments-grid { display:grid; gap:10px; }
+.comment-card { background:#fff; border-radius:var(--radius-lg); border:1px solid var(--gray-200); overflow:hidden; }
+.comment-card.status-ok     { border-left:4px solid var(--green-mid); }
+.comment-card.status-cambio { border-left:4px solid var(--amber-mid); }
+.comment-card.status-skip   { border-left:4px solid var(--gray-400); }
+.comment-card.status-none   { border-left:4px solid var(--gray-100); opacity:.6; }
+.cc-header { display:flex; align-items:flex-start; justify-content:space-between; padding:10px 12px 8px; }
+.cc-title { font-size:13px; font-weight:600; color:var(--gray-900); line-height:1.3; flex:1; margin-right:8px; }
+.cc-status-badge { font-size:10px; font-weight:700; padding:3px 8px; border-radius:20px; flex-shrink:0; text-transform:uppercase; letter-spacing:.04em; }
+.csb-ok     { background:var(--green-light); color:var(--green-text); }
+.csb-cambio { background:var(--amber-light); color:var(--amber-text); }
+.csb-skip   { background:var(--gray-100); color:var(--gray-400); }
+.csb-none   { background:var(--gray-100); color:var(--gray-400); }
+.cc-meta { display:flex; flex-wrap:wrap; gap:5px; padding:0 12px 8px; }
+.cc-body { padding:0 12px 10px; }
+.cc-tipos { font-size:11px; color:var(--amber-text); font-weight:600; margin-bottom:4px; }
+.cc-nota { font-size:12px; color:var(--gray-700); background:var(--gray-50); padding:7px 9px; border-radius:var(--radius-sm); line-height:1.5; }
+.cc-respuesta { font-size:12px; background:var(--purple-light); color:var(--purple-text); padding:7px 9px; border-radius:var(--radius-sm); margin-top:5px; }
+.cc-respuesta strong { display:block; font-size:10px; text-transform:uppercase; letter-spacing:.05em; margin-bottom:2px; }
+.filter-row { display:flex; gap:6px; margin-bottom:1rem; flex-wrap:wrap; }
+.filter-btn { padding:6px 12px; border-radius:20px; border:1.5px solid var(--gray-200); background:#fff; font-size:12px; font-weight:500; font-family:inherit; cursor:pointer; color:var(--gray-700); transition:background .12s,border-color .12s; }
+.filter-btn.active { background:var(--green-light); border-color:var(--green-mid); color:var(--green-dark); font-weight:600; }
+.empty-state { text-align:center; padding:2.5rem 1rem; color:var(--gray-400); font-size:13px; }
+
+/* LOADING OVERLAY */
+.fb-loading { display:flex; align-items:center; justify-content:center; padding:3rem 1rem; flex-direction:column; gap:12px; color:var(--gray-400); font-size:13px; }
+.spinner { width:24px; height:24px; border:2.5px solid var(--gray-200); border-top-color:var(--green-mid); border-radius:50%; animation:spin .7s linear infinite; }
+@keyframes spin { to{transform:rotate(360deg)} }
+
+/* TOAST */
+.toast { position:fixed; bottom:24px; left:50%; transform:translateX(-50%) translateY(80px); background:var(--gray-900); color:#fff; padding:10px 18px; border-radius:var(--radius-md); font-size:13px; font-weight:500; z-index:100; opacity:0; transition:transform .25s,opacity .25s; pointer-events:none; white-space:nowrap; }
+.toast.show { transform:translateX(-50%) translateY(0); opacity:1; }
+
+@media(max-width:480px){
+  .card-tema{font-size:16px;} .btn{font-size:12px;padding:11px 6px;}
+  .bar-label{min-width:100px;max-width:100px;} .tab{padding:10px 10px;font-size:12px;}
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-logo">
+    <div class="logo-mark">PTI</div>
+    <div>
+      <div class="header-title">Revisión de parrilla</div>
+      <div class="header-sub">Julio 2025</div>
+    </div>
+  </div>
+  <div class="header-right">
+    <div class="sync-label">
+      <span class="sync-dot" id="sync-dot"></span>
+      <span id="sync-label">Conectando…</span>
+    </div>
+    <div class="header-counter" id="hdr-counter">1 / 28</div>
+    <button class="btn-reset" onclick="resetAll()">
+      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-3.5"/></svg>
+      Limpiar
+    </button>
+  </div>
+</div>
+
+<div class="tabs-wrap">
+  <button class="tab active" onclick="switchTab('revision')" id="tab-revision">
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+    Revisión
+    <span class="tab-badge" id="tbadge-revision">28</span>
+  </button>
+  <button class="tab" onclick="switchTab('resumen')" id="tab-resumen">
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/></svg>
+    Resumen del mes
+  </button>
+  <button class="tab" onclick="switchTab('comentarios')" id="tab-comentarios">
+    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+    Comentarios
+    <span class="tab-badge" id="tbadge-comentarios">0</span>
+  </button>
+</div>
+
+<div class="panel active" id="panel-revision">
+  <div style="background:#fff;padding:0 1.25rem .65rem;border-bottom:1px solid var(--gray-200)">
+    <div class="progress-track"><div class="progress-fill" id="prog" style="width:0%"></div></div>
+  </div>
+  <div class="main" id="app"></div>
+</div>
+
+<div class="panel" id="panel-resumen">
+  <div class="main" id="resumen-content"></div>
+</div>
+
+<div class="panel" id="panel-comentarios">
+  <div class="main" id="comentarios-content"></div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<!-- Firebase -->
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+import { getFirestore, doc, setDoc, getDoc, onSnapshot, collection, getDocs }
+  from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+// ── CONFIG ────────────────────────────────────────────────────────────────────
+// Para reutilizar con otro cliente/mes, solo cambia estas dos variables:
+const CLIENTE = "pti";
+const MES     = "julio-2025";
+// ─────────────────────────────────────────────────────────────────────────────
+
+const firebaseConfig = {
+  apiKey: "AIzaSyBXXtUwnIcqJ4acxZIThuMWrnzDpLRf2ME",
+  authDomain: "ima-parrillas.firebaseapp.com",
+  projectId: "ima-parrillas",
+  storageBucket: "ima-parrillas.firebasestorage.app",
+  messagingSenderId: "445126468423",
+  appId: "1:445126468423:web:fae0c3513015c52040a262"
+};
+
+const fbApp = initializeApp(firebaseConfig);
+const db    = getFirestore(fbApp);
+
+// ── HELPERS ───────────────────────────────────────────────────────────────────
+function decisionRef(piezaId) {
+  return doc(db, "parrillas", CLIENTE, MES, piezaId);
+}
+
+function setSyncStatus(status, label) {
+  const dot = document.getElementById('sync-dot');
+  const lbl = document.getElementById('sync-label');
+  dot.className = 'sync-dot ' + status;
+  lbl.textContent = label;
+}
+
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
+
+// ── SAVE ──────────────────────────────────────────────────────────────────────
+async function saveDecision(entry) {
+  setSyncStatus('syncing', 'Guardando…');
+  try {
+    await setDoc(decisionRef(entry.pieza.id), {
+      piezaId:           entry.pieza.id,
+      tema:              entry.pieza.tema,
+      formato:           entry.pieza.formato,
+      tipo:              entry.tipo,
+      nota:              entry.nota || '',
+      tipos:             entry.tipos || [],
+      respuestaCorrecta: entry.respuestaCorrecta || '',
+      timestamp:         new Date().toISOString()
+    });
+    setSyncStatus('synced', 'Guardado ✓');
+  } catch(e) {
+    setSyncStatus('error', 'Error al guardar');
+    showToast('⚠️ No se pudo guardar. Revisa tu conexión.');
+    console.error(e);
+  }
+}
+
+// ── LOAD ──────────────────────────────────────────────────────────────────────
+async function loadDecisions() {
+  setSyncStatus('syncing', 'Cargando…');
+  try {
+    const colRef = collection(db, "parrillas", CLIENTE, MES);
+    const snap   = await getDocs(colRef);
+    snap.forEach(d => {
+      const data = d.data();
+      const pieza = piezas.find(p => p.id === data.piezaId);
+      if (!pieza) return;
+      const existing = state.decisions.findIndex(x => x.pieza.id === data.piezaId);
+      const entry = { pieza, tipo: data.tipo, nota: data.nota, tipos: data.tipos, respuestaCorrecta: data.respuestaCorrecta };
+      if (existing >= 0) state.decisions[existing] = entry;
+      else state.decisions.push(entry);
+    });
+    setSyncStatus('synced', 'Sincronizado');
+
+    // Advance idx to first unanswered
+    while (state.idx < piezas.length && state.decisions.find(d => d.pieza.id === piezas[state.idx].id)) {
+      state.idx++;
+    }
+    render();
+    updateTabBadges();
+  } catch(e) {
+    setSyncStatus('error', 'Sin conexión');
+    showToast('⚠️ No se pudo cargar. Trabajando sin conexión.');
+    render();
+    console.error(e);
+  }
+}
+
+// ── REALTIME LISTENER (para el tab Comentarios) ───────────────────────────────
+function subscribeToDecisions() {
+  const colRef = collection(db, "parrillas", CLIENTE, MES);
+  onSnapshot(colRef, snap => {
+    snap.docChanges().forEach(change => {
+      if (change.type === 'added' || change.type === 'modified') {
+        const data  = change.doc.data();
+        const pieza = piezas.find(p => p.id === data.piezaId);
+        if (!pieza) return;
+        const existing = state.decisions.findIndex(x => x.pieza.id === data.piezaId);
+        const entry = { pieza, tipo: data.tipo, nota: data.nota, tipos: data.tipos, respuestaCorrecta: data.respuestaCorrecta };
+        if (existing >= 0) state.decisions[existing] = entry;
+        else state.decisions.push(entry);
+      }
+    });
+    updateTabBadges();
+    if (state.currentTab === 'comentarios') renderComentarios();
+  });
+}
+
+// ── EXPOSE TO GLOBAL ──────────────────────────────────────────────────────────
+window._fbSave = saveDecision;
+
+// ── BOOT ──────────────────────────────────────────────────────────────────────
+await loadDecisions();
+subscribeToDecisions();
+
+</script>
+
+<script>
+// ─────────────────────────────────────────────
+// DATA
+// ─────────────────────────────────────────────
+const piezas = [
+  { id:"R1",  tema:"Maleem BT Mosquito",                    formato:"Reel",     encuesta:false, cultivos:[],                                 productos:["MAALEM BT MOSQUITO"],                             temas_contenido:["mosquitos","larvas"],                    guion:"El problema no empieza cuando ves al mosquito. La verdadera batalla comienza en el agua. Con MAALEM BT MOSQUITO, actúas desde el origen con tecnología microbiológica para controlar larvas." },
+  { id:"H1",  tema:"Encuesta — plagas en lluvias",          formato:"Historia", encuesta:true,  cultivos:[],                                 productos:[],                                                 temas_contenido:["ácaros","trips","enfermedades","maleza"], guion:"¿Qué problema afecta más tu cultivo en lluvias? Ácaros / Trips / Enfermedades / Maleza" },
+  { id:"I1",  tema:"Recompensas Pronatura",                 formato:"Imagen",   encuesta:false, cultivos:[],                                 productos:["Naturazo"],                                       temas_contenido:["programa de lealtad"],                   guion:"¡Últimos días! Haz un Naturazo con PTI. Registra tus tickets y gana." },
+  { id:"C1",  tema:"Plagas en pico durante julio",          formato:"Carrusel", encuesta:false, cultivos:["Chile","Tomate","Limón","Pepino"], productos:["Gamma","Bio-Die","NeemAcar"],                      temas_contenido:["trips","chupadores","ácaros"],           guion:"Julio activa plagas rápidamente. Trips, chupadores y ácaros afectan rendimiento. Anticípate con PTI." },
+  { id:"H2",  tema:"NeemAcar — ácaros en temporada húmeda", formato:"Historia", encuesta:false, cultivos:[],                                 productos:["NeemAcar"],                                       temas_contenido:["ácaros"],                               guion:"El calor y la humedad favorecen el aumento de ácaros. NeemAcar ayuda a implementar un manejo preventivo y efectivo." },
+  { id:"I2",  tema:"Video BT Mosquito",                     formato:"Imagen",   encuesta:false, cultivos:[],                                 productos:["MAALEM BT MOSQUITO"],                             temas_contenido:["mosquitos"],                             guion:"Video BT Mosquito." },
+  { id:"H3",  tema:"Enraizador — nutrientes lavados",       formato:"Historia", encuesta:false, cultivos:[],                                 productos:["Enraizador PTI"],                                 temas_contenido:["nutrición","raíz"],                      guion:"Las lluvias pueden provocar lavado de nutrientes. Enraizador PTI favorece mejor desarrollo radicular." },
+  { id:"C2",  tema:"El problema empieza bajo tierra",       formato:"Carrusel", encuesta:false, cultivos:["Papa","Cebolla","Plátano","Aguacate"], productos:["BIO-QUITINA","Enraizador","Xtra Alga"],       temas_contenido:["salud del suelo","raíz"],                guion:"Mucha lluvia también debilita el suelo. Activa el suelo con Biodefensores del suelo PTI." },
+  { id:"R2",  tema:"Biodefensores del campo",               formato:"Reel",     encuesta:false, cultivos:[],                                 productos:["Gamma","Cinnacar","Bio-Die","Natural King","Ovi-Die"], temas_contenido:["trips","ácaros","chupadores"],      guion:"Gamma, Cinnacar, Bio-Die, Natural King, Ovi-Die. Estrategia completa para proteger rendimiento." },
+  { id:"H4",  tema:"Gamma — trips en temporada húmeda",     formato:"Historia", encuesta:false, cultivos:[],                                 productos:["Gamma"],                                          temas_contenido:["trips"],                                guion:"Los trips aumentan durante temporada húmeda. Gamma ayuda a reducir su impacto." },
+  { id:"H5",  tema:"BIO-QUITINA — suelo sano",             formato:"Historia", encuesta:false, cultivos:[],                                 productos:["BIO-QUITINA"],                                    temas_contenido:["salud del suelo","microorganismos"],     guion:"BIO-QUITINA activa microorganismos benéficos y ayuda a fortalecer la raíz." },
+  { id:"I3",  tema:"Video TURAL",                           formato:"Imagen",   encuesta:false, cultivos:[],                                 productos:["TURAL"],                                          temas_contenido:["aves","protección de fruta"],            guion:"Video de Tural." },
+  { id:"R3",  tema:"Agricultura Protegida (AP)",            formato:"Reel",     encuesta:false, cultivos:[],                                 productos:[],                                                 temas_contenido:["invernadero","biosoluciones"],           guion:"La lluvia no entra al invernadero... pero sus efectos sí." },
+  { id:"H6",  tema:"MAALEM BT MOSQUITO — larvas",           formato:"Historia", encuesta:false, cultivos:[],                                 productos:["MAALEM BT MOSQUITO"],                             temas_contenido:["mosquitos","larvas"],                    guion:"Las lluvias favorecen la aparición de mosquitos. MAALEM BT MOSQUITO actúa sobre larvas." },
+  { id:"H7",  tema:"Natural King — ornamentales",           formato:"Historia", encuesta:false, cultivos:["Ornamentales"],                   productos:["Natural King"],                                   temas_contenido:["calidad visual","protección"],           guion:"En ornamentales, la calidad visual lo es todo. Natural King ayuda a proteger el cultivo." },
+  { id:"R4",  tema:"Prolux Ultra — cobertura",              formato:"Reel",     encuesta:false, cultivos:[],                                 productos:["Prolux Ultra"],                                   temas_contenido:["cobertura de aplicación"],               guion:"Con Prolux Ultra, mejoras la cobertura y distribución para aprovechar mejor cada gota." },
+  { id:"R5",  tema:"Trihormonal — desarrollo vegetal",      formato:"Reel",     encuesta:false, cultivos:[],                                 productos:["Trihormonal"],                                    temas_contenido:["crecimiento","floración","nutrición"],   guion:"Con Trihormonal®, estimulas procesos fisiológicos clave de crecimiento y floración." },
+  { id:"H8",  tema:"Prolux Ultra — lluvias y aplicaciones", formato:"Historia", encuesta:false, cultivos:[],                                 productos:["Prolux Ultra"],                                   temas_contenido:["cobertura de aplicación"],               guion:"Las lluvias pueden reducir la efectividad de las aplicaciones. Prolux Ultra mejora cobertura." },
+  { id:"C3",  tema:"Agricultura Protegida — control",       formato:"Carrusel", encuesta:false, cultivos:["Berries","Tomate","Ornamentales"], productos:["NeemAcar","Nimicide 80","Natural King"],          temas_contenido:["inocuidad","residuos cero"],             guion:"En AP, cada aplicación cuenta. Menos residuos, más inocuidad. Pasaporte Triple Cero." },
+  { id:"H9",  tema:"Antipiratería",                         formato:"Historia", encuesta:false, cultivos:[],                                 productos:[],                                                 temas_contenido:["antipiratería","inocuidad"],             guion:"Un producto pirata puede afectar rendimiento e inocuidad. Verifica siempre tu envase." },
+  { id:"I4",  tema:"Agricultura Protegida — imagen",        formato:"Imagen",   encuesta:false, cultivos:[],                                 productos:[],                                                 temas_contenido:["invernadero","precisión"],               guion:"AP no es solo producir bajo cubierta. Es controlar mejor agua, nutrición y sanidad." },
+  { id:"R6",  tema:"TURAL — protección vs aves",            formato:"Reel",     encuesta:false, cultivos:[],                                 productos:["TURAL"],                                          temas_contenido:["aves","protección de fruta"],            guion:"TURAL® protege frutos mediante una estrategia natural de repelencia para aves." },
+  { id:"H10", tema:"Pasaporte Triple Cero PTI",             formato:"Historia", encuesta:false, cultivos:[],                                 productos:["Pasaporte Triple Cero PTI"],                      temas_contenido:["inocuidad","residuos cero","exportación"],guion:"Con el Pasaporte Triple Cero PTI: cero químicos, cero residuos, cero días a cosecha." },
+  { id:"C4",  tema:"Las lluvias no vienen solas",           formato:"Carrusel", encuesta:false, cultivos:["Tomate","Chile","Pepino","Calabaza"], productos:["ULTRABIN","PTIstrobin","Prolux Ultra"],        temas_contenido:["enfermedades","hongos","bacterias"],     guion:"La humedad crea condiciones para enfermedades. Hongos y bacterias aumentan rápidamente." },
+  { id:"H11", tema:"AP — biosoluciones",                    formato:"Historia", encuesta:false, cultivos:[],                                 productos:[],                                                 temas_contenido:["invernadero","biosoluciones"],           guion:"Tener un invernadero no elimina los riesgos. Las biosoluciones PTI fortalecen tu estrategia." },
+  { id:"R7",  tema:"Enfermedades — manejo preventivo",      formato:"Reel",     encuesta:false, cultivos:[],                                 productos:[],                                                 temas_contenido:["enfermedades","manejo preventivo"],      guion:"El error más común es esperar a ver las enfermedades. El manejo preventivo es clave." },
+  { id:"H12", tema:"Encuesta — ¿qué cultivo trabajas?",     formato:"Historia", encuesta:true,  cultivos:["Tomate","Aguacate","Berries","Chile"], productos:[],                                            temas_contenido:["segmentación"],                         guion:"¿Qué cultivo trabajas actualmente? Tomate / Aguacate / Berries / Chile / Otro" },
+  { id:"R8",  tema:"Salud del suelo",                       formato:"Reel",     encuesta:false, cultivos:[],                                 productos:[],                                                 temas_contenido:["salud del suelo","raíz","nutrición"],    guion:"Un suelo sano mejora absorción de nutrientes y fortalece el desarrollo radicular." },
+];
+
+const FORMATO_ICONS = {
+  "Reel":    `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="5 3 19 12 5 21 5 3"/></svg>`,
+  "Historia":`<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="2" width="20" height="20" rx="3"/><line x1="12" y1="6" x2="12" y2="18"/></svg>`,
+  "Carrusel":`<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="5" width="14" height="14" rx="2"/><rect x="9" y="7" width="14" height="14" rx="2"/></svg>`,
+  "Imagen":  `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>`,
+};
+
+const state = { idx: 0, decisions: [], currentTab: 'revision', filterComentarios: 'todos' };
+
+const CHECK = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`;
+const EDIT  = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>`;
+const CLOCK = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>`;
+const PREV  = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="15 18 9 12 15 6"/></svg>`;
+const NEXT  = `<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>`;
+const DL    = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>`;
+
+// ── TABS ──────────────────────────────────────────────────────────────────────
+function switchTab(tab) {
+  state.currentTab = tab;
+  ['revision','resumen','comentarios'].forEach(t => {
+    document.getElementById('tab-' + t).classList.toggle('active', t === tab);
+    document.getElementById('panel-' + t).classList.toggle('active', t === tab);
+  });
+  if (tab === 'resumen')     renderResumen();
+  if (tab === 'comentarios') renderComentarios();
+}
+
+function updateTabBadges() {
+  const sin = piezas.length - state.decisions.length;
+  document.getElementById('tbadge-revision').textContent = sin + ' por revisar';
+  const comentarios = state.decisions.filter(d => d.tipo !== 'ok' || d.respuestaCorrecta).length;
+  document.getElementById('tbadge-comentarios').textContent = comentarios;
+}
+
+// ── RENDER REVISION ───────────────────────────────────────────────────────────
+function render() {
+  const app = document.getElementById('app');
+  const total = piezas.length;
+  if (state.idx >= total) { renderDone(app); return; }
+
+  const p   = piezas[state.idx];
+  const pct = Math.round((state.idx / total) * 100);
+  document.getElementById('prog').style.width = pct + '%';
+  document.getElementById('hdr-counter').textContent = (state.idx + 1) + ' / ' + total;
+
+  const dec     = state.decisions.find(d => d.pieza.id === p.id);
+  const fmtIcon = FORMATO_ICONS[p.formato] || '';
+  const fmtLabel = p.formato === 'Reel' ? 'Reel (video)' : p.formato === 'Imagen' ? 'Imagen estática' : p.formato;
+
+  app.innerHTML = `
+    <div class="card">
+      <div class="card-header">
+        <div class="card-meta">
+          <span class="badge badge-id">${p.id}</span>
+          <span class="badge badge-formato">${fmtIcon} ${fmtLabel}</span>
+          ${p.encuesta ? `<span class="badge badge-encuesta">📊 Encuesta</span>` : ''}
+        </div>
+        <div class="card-tema">${p.tema}</div>
+      </div>
+      <div class="card-body">
+        ${p.cultivos.length ? `<div class="section-label">🌱 Cultivos</div><div class="badges-row">${p.cultivos.map(c=>`<span class="badge badge-cultivo">${c}</span>`).join('')}</div>` : ''}
+        ${p.productos.length ? `<div class="section-label" style="margin-top:${p.cultivos.length?'12px':'0'}">🧪 Productos</div><div class="badges-row">${p.productos.map(pr=>`<span class="badge badge-producto">${pr}</span>`).join('')}</div>` : ''}
+        <div class="section-label" style="margin-top:${(p.cultivos.length||p.productos.length)?'12px':'0'}">📄 Guion / idea</div>
+        <div class="guion-box">${p.guion}</div>
+        ${p.encuesta ? `
+        <div class="encuesta-panel">
+          <div class="encuesta-label">🗳 La respuesta correcta es…</div>
+          <input class="encuesta-input" id="encuesta-resp" type="text"
+            placeholder="Ej: Trips, porque en julio aumentan con la humedad…"
+            value="${dec && dec.respuestaCorrecta ? dec.respuestaCorrecta : ''}">
+        </div>` : ''}
+      </div>
+      <div class="btn-row">
+        <button class="btn btn-ok"     onclick="decide('ok')">${CHECK} Aprobado</button>
+        <button class="btn btn-cambio" onclick="showChange()">${EDIT} Necesita cambio</button>
+        <button class="btn btn-skip"   onclick="decide('skip')" title="Revisar después">${CLOCK}</button>
+      </div>
+      <div class="nav-row">
+        <button class="btn-nav" onclick="navTo(${state.idx-1})" ${state.idx===0?'disabled':''}>
+          ${PREV} Anterior
+        </button>
+        <div class="nav-status">
+          <span class="status-dot ${dec?dec.tipo:''}"></span>
+          <span>${dec?(dec.tipo==='ok'?'Aprobado':dec.tipo==='cambio'?'Con cambio':'Pendiente'):'Sin revisar'}</span>
+        </div>
+        <button class="btn-nav" onclick="navTo(${state.idx+1})" ${state.idx>=total-1?'disabled':''}>
+          Siguiente ${NEXT}
+        </button>
+      </div>
+      <div class="change-panel" id="change-panel">
+        <div class="change-panel-title">¿Qué necesita corrección?</div>
+        <div class="chk-options">
+          <label class="chk-row"><input type="checkbox" id="chk-cultivo"> El cultivo no aplica o hay que cambiarlo</label>
+          <label class="chk-row"><input type="checkbox" id="chk-producto"> Hay que cambiar o agregar un producto</label>
+          <label class="chk-row"><input type="checkbox" id="chk-mensaje"> El mensaje o enfoque no es correcto</label>
+          <label class="chk-row"><input type="checkbox" id="chk-otro"> Otro</label>
+        </div>
+        <textarea id="cambio-nota" rows="3" placeholder="Escribe el cambio específico (ej: cambiar Limón por Mango, usar Cinnacar en lugar de NeemAcar)…"></textarea>
+        <button class="btn-confirm" onclick="confirmChange()">Confirmar cambio →</button>
+      </div>
+    </div>`;
+  restoreChangePanel(dec);
+  updateTabBadges();
+}
+
+function showChange() { document.getElementById('change-panel').style.display = 'block'; }
+
+function restoreChangePanel(dec) {
+  if (!dec || dec.tipo !== 'cambio') return;
+  document.getElementById('change-panel').style.display = 'block';
+  if (dec.tipos.includes('Cultivo'))  document.getElementById('chk-cultivo').checked  = true;
+  if (dec.tipos.includes('Producto')) document.getElementById('chk-producto').checked = true;
+  if (dec.tipos.includes('Mensaje'))  document.getElementById('chk-mensaje').checked  = true;
+  if (dec.tipos.includes('Otro'))     document.getElementById('chk-otro').checked     = true;
+  document.getElementById('cambio-nota').value = dec.nota || '';
+}
+
+function guardarRespuestaEncuesta() {
+  const p  = piezas[state.idx];
+  if (!p.encuesta) return;
+  const el = document.getElementById('encuesta-resp');
+  if (!el) return;
+  const val = el.value.trim();
+  if (!val) return;
+  const existing = state.decisions.findIndex(d => d.pieza.id === p.id);
+  if (existing >= 0) state.decisions[existing].respuestaCorrecta = val;
+  else state.decisions.push({ pieza: p, tipo: 'ok', nota: '', tipos: [], respuestaCorrecta: val });
+}
+
+function navTo(idx) {
+  if (idx < 0 || idx >= piezas.length) return;
+  guardarRespuestaEncuesta();
+  state.idx = idx;
+  render();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function decide(tipo, nota, tipos) {
+  guardarRespuestaEncuesta();
+  const p      = piezas[state.idx];
+  const respEl = document.getElementById('encuesta-resp');
+  const respuestaCorrecta = respEl ? respEl.value.trim() : '';
+  const existing = state.decisions.findIndex(d => d.pieza.id === p.id);
+  const entry = { pieza: p, tipo, nota: nota||'', tipos: tipos||[], respuestaCorrecta };
+  if (existing >= 0) state.decisions[existing] = entry;
+  else state.decisions.push(entry);
+
+  // Save to Firebase
+  if (window._fbSave) window._fbSave(entry);
+
+  state.idx++;
+  render();
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+function confirmChange() {
+  const nota  = document.getElementById('cambio-nota').value.trim();
+  const tipos = [];
+  if (document.getElementById('chk-cultivo').checked)  tipos.push('Cultivo');
+  if (document.getElementById('chk-producto').checked) tipos.push('Producto');
+  if (document.getElementById('chk-mensaje').checked)  tipos.push('Mensaje');
+  if (document.getElementById('chk-otro').checked)     tipos.push('Otro');
+  decide('cambio', nota, tipos);
+}
+
+function resetAll() {
+  if (!confirm('¿Borrar todas las respuestas locales y empezar de cero?\n\nNota: los datos ya guardados en la nube no se borran.')) return;
+  state.idx = 0; state.decisions = [];
+  switchTab('revision');
+  render();
+  window.scrollTo({ top: 0 });
+}
+
+// ── DONE SCREEN ───────────────────────────────────────────────────────────────
+function renderDone(app) {
+  document.getElementById('prog').style.width = '100%';
+  document.getElementById('hdr-counter').textContent = '✓ Completado';
+  const oks    = state.decisions.filter(d => d.tipo === 'ok');
+  const cambios= state.decisions.filter(d => d.tipo === 'cambio');
+  const skips  = state.decisions.filter(d => d.tipo === 'skip');
+  app.innerHTML = `
+    <div class="done-screen">
+      <div class="done-icon">✅</div>
+      <div class="done-h">¡Revisión completada!</div>
+      <div class="done-p">Tus comentarios se guardaron automáticamente.</div>
+      <div class="stats-row">
+        <div class="stat-box stat-ok"><div class="num">${oks.length}</div><div class="lbl">Aprobados</div></div>
+        <div class="stat-box stat-cambio"><div class="num">${cambios.length}</div><div class="lbl">Con cambios</div></div>
+        ${skips.length ? `<div class="stat-box stat-skip"><div class="num">${skips.length}</div><div class="lbl">Pendientes</div></div>` : ''}
+      </div>
+      <div class="export-row">
+        <button class="btn-export" onclick="exportar()">${DL} Descargar resumen</button>
+        <button class="btn-restart" onclick="restart()">Revisar de nuevo</button>
+        <button class="btn-export" style="background:var(--blue-mid)" onclick="switchTab('comentarios')">Ver comentarios →</button>
+      </div>
+    </div>`;
+  updateTabBadges();
+}
+
+function restart() { state.idx = 0; state.decisions = []; render(); window.scrollTo({top:0}); }
+
+// ── RESUMEN DEL MES ───────────────────────────────────────────────────────────
+function renderResumen() {
+  const cont = document.getElementById('resumen-content');
+  const prodCount = {}; piezas.forEach(p => p.productos.forEach(pr => { prodCount[pr] = (prodCount[pr]||0)+1; }));
+  const cultCount = {}; piezas.forEach(p => p.cultivos.forEach(c  => { cultCount[c]  = (cultCount[c] ||0)+1; }));
+  const temaCount = {}; piezas.forEach(p => p.temas_contenido.forEach(t => { temaCount[t] = (temaCount[t]||0)+1; }));
+  const fmtCount  = {}; piezas.forEach(p => { fmtCount[p.formato] = (fmtCount[p.formato]||0)+1; });
+  const prods = Object.entries(prodCount).sort((a,b)=>b[1]-a[1]);
+  const cults = Object.entries(cultCount).sort((a,b)=>b[1]-a[1]);
+  const temas = Object.entries(temaCount).sort((a,b)=>b[1]-a[1]);
+  const fmtColors = { Reel:'#378ADD', Historia:'#7C5CBF', Carrusel:'#E59A1A', Imagen:'#1D9E75' };
+  function barRows(entries, cls, max) {
+    return entries.map(([label,cnt]) => `
+      <div class="bar-row">
+        <div class="bar-label" title="${label}">${label}</div>
+        <div class="bar-track"><div class="bar-fill ${cls}" style="width:${Math.round(cnt/max*100)}%"></div></div>
+        <div class="bar-count">${cnt}×</div>
+      </div>`).join('');
+  }
+  cont.innerHTML = `
+    <div class="resumen-card resumen-section">
+      <div class="resumen-title"><span>📦</span> Formatos del mes</div>
+      <div class="formato-grid">
+        ${Object.entries(fmtCount).map(([fmt,cnt]) => `
+          <div class="formato-item">
+            <div class="formato-icon-wrap" style="background:${fmtColors[fmt]}22">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="${fmtColors[fmt]}" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+                ${fmt==='Reel'?'<polygon points="5 3 19 12 5 21 5 3"/>':fmt==='Historia'?'<rect x="2" y="2" width="20" height="20" rx="3"/><line x1="12" y1="6" x2="12" y2="18"/>':fmt==='Carrusel'?'<rect x="1" y="5" width="14" height="14" rx="2"/><rect x="9" y="7" width="14" height="14" rx="2"/>':'<rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/>'}
+              </svg>
+            </div>
+            <div><div class="formato-num">${cnt}</div><div class="formato-lbl">${fmt}${cnt>1?'s':''}</div></div>
+          </div>`).join('')}
+      </div>
+    </div>
+    <div class="resumen-card resumen-section">
+      <div class="resumen-title"><span>🧪</span> Productos mencionados este mes</div>
+      ${barRows(prods,'bar-fill-producto',prods[0]?.[1]||1)}
+    </div>
+    <div class="resumen-card resumen-section">
+      <div class="resumen-title"><span>🌱</span> Cultivos trabajados este mes</div>
+      ${cults.length ? barRows(cults,'bar-fill-cultivo',cults[0]?.[1]||1) : '<p style="font-size:13px;color:var(--gray-400)">Sin cultivos específicos asignados</p>'}
+    </div>
+    <div class="resumen-card resumen-section">
+      <div class="resumen-title"><span>🔬</span> Temas mencionados (plagas, enfermedades, etc.)</div>
+      ${barRows(temas,'bar-fill-tema',temas[0]?.[1]||1)}
+    </div>`;
+}
+
+// ── COMENTARIOS ───────────────────────────────────────────────────────────────
+function renderComentarios() {
+  const cont = document.getElementById('comentarios-content');
+  const f = state.filterComentarios;
+  const cambios = state.decisions.filter(d=>d.tipo==='cambio').length;
+  const skips   = state.decisions.filter(d=>d.tipo==='skip').length;
+  const oks     = state.decisions.filter(d=>d.tipo==='ok').length;
+  const sin     = piezas.length - state.decisions.length;
+
+  let lista = piezas;
+  if (f==='cambio')   lista = piezas.filter(p=>state.decisions.find(d=>d.pieza.id===p.id&&d.tipo==='cambio'));
+  else if (f==='ok')  lista = piezas.filter(p=>state.decisions.find(d=>d.pieza.id===p.id&&d.tipo==='ok'));
+  else if (f==='pendiente') lista = piezas.filter(p=>{ const d=state.decisions.find(x=>x.pieza.id===p.id); return !d||d.tipo==='skip'; });
+
+  const cards = lista.map(p => {
+    const dec  = state.decisions.find(d=>d.pieza.id===p.id);
+    const tipo = dec ? dec.tipo : 'none';
+    const statusLabel = {ok:'Aprobado',cambio:'Cambio',skip:'Pendiente',none:'Sin revisar'};
+    const statusCls   = {ok:'csb-ok',cambio:'csb-cambio',skip:'csb-skip',none:'csb-none'};
+    const fmtIcon  = FORMATO_ICONS[p.formato] || '';
+    const fmtLabel = p.formato==='Reel'?'Reel (video)':p.formato==='Imagen'?'Imagen estática':p.formato;
+    return `
+      <div class="comment-card status-${tipo}">
+        <div class="cc-header">
+          <div class="cc-title">${p.tema}</div>
+          <span class="cc-status-badge ${statusCls[tipo]}">${statusLabel[tipo]}</span>
+        </div>
+        <div class="cc-meta">
+          <span class="badge badge-id">${p.id}</span>
+          <span class="badge badge-formato">${fmtIcon} ${fmtLabel}</span>
+          ${p.cultivos.map(c=>`<span class="badge badge-cultivo">${c}</span>`).join('')}
+          ${p.productos.map(pr=>`<span class="badge badge-producto">${pr}</span>`).join('')}
+        </div>
+        ${dec&&(dec.nota||dec.tipos.length||dec.respuestaCorrecta) ? `
+        <div class="cc-body">
+          ${dec.tipos.length ? `<div class="cc-tipos">Tipo de cambio: ${dec.tipos.join(' · ')}</div>` : ''}
+          ${dec.nota ? `<div class="cc-nota">${dec.nota}</div>` : ''}
+          ${dec.respuestaCorrecta ? `<div class="cc-respuesta"><strong>Respuesta correcta</strong>${dec.respuestaCorrecta}</div>` : ''}
+        </div>` : ''}
+      </div>`;
+  }).join('');
+
+  cont.innerHTML = `
+    <div style="margin-bottom:1rem">
+      <div style="font-size:13px;font-weight:600;color:var(--gray-900);margin-bottom:4px">Tablero de retroalimentación</div>
+      <div style="font-size:12px;color:var(--gray-400)">${state.decisions.length} de ${piezas.length} piezas revisadas · se actualiza en tiempo real</div>
+    </div>
+    <div class="filter-row">
+      <button class="filter-btn ${f==='todos'?'active':''}"    onclick="setFilter('todos')">Todas (${piezas.length})</button>
+      <button class="filter-btn ${f==='cambio'?'active':''}"   onclick="setFilter('cambio')">Cambios (${cambios})</button>
+      <button class="filter-btn ${f==='ok'?'active':''}"       onclick="setFilter('ok')">Aprobadas (${oks})</button>
+      <button class="filter-btn ${f==='pendiente'?'active':''}" onclick="setFilter('pendiente')">Sin revisar (${sin+skips})</button>
+    </div>
+    <div class="comments-grid">
+      ${lista.length ? cards : '<div class="empty-state">No hay piezas en esta categoría todavía.</div>'}
+    </div>
+    <div style="margin-top:1.5rem;display:flex;gap:8px;flex-wrap:wrap">
+      <button class="btn-export" onclick="exportar()">${DL} Descargar resumen</button>
+    </div>`;
+}
+
+function setFilter(f) { state.filterComentarios = f; renderComentarios(); }
+
+// ── EXPORT ────────────────────────────────────────────────────────────────────
+function exportar() {
+  const oks    = state.decisions.filter(d=>d.tipo==='ok');
+  const cambios= state.decisions.filter(d=>d.tipo==='cambio');
+  const skips  = state.decisions.filter(d=>d.tipo==='skip');
+  const fecha  = new Date().toLocaleDateString('es-MX',{day:'2-digit',month:'long',year:'numeric'});
+  let txt = 'RETROALIMENTACIÓN — PARRILLA PTI JULIO\nGenerado el ' + fecha + '\n' + '='.repeat(42) + '\n\n';
+  txt += 'APROBADOS (' + oks.length + ')\n' + '-'.repeat(30) + '\n';
+  oks.forEach(d => { txt += '• ' + d.pieza.id + ' — ' + d.pieza.tema + '\n'; if(d.respuestaCorrecta) txt += '  Respuesta correcta: ' + d.respuestaCorrecta + '\n'; });
+  txt += '\nCON CAMBIOS (' + cambios.length + ')\n' + '-'.repeat(30) + '\n';
+  cambios.forEach(d => { txt += '• ' + d.pieza.id + ' — ' + d.pieza.tema + '\n'; if(d.tipos.length) txt += '  Tipo: ' + d.tipos.join(', ') + '\n'; if(d.nota) txt += '  Nota: ' + d.nota + '\n'; if(d.respuestaCorrecta) txt += '  Respuesta correcta: ' + d.respuestaCorrecta + '\n'; txt += '\n'; });
+  if (skips.length) { txt += 'PENDIENTES (' + skips.length + ')\n' + '-'.repeat(30) + '\n'; skips.forEach(d => { txt += '• ' + d.pieza.id + ' — ' + d.pieza.tema + '\n'; }); }
+  const blob = new Blob([txt],{type:'text/plain;charset=utf-8'});
+  const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'PTI_retroalimentacion_julio.txt'; a.click();
+}
+
+render();
+</script>
+</body>
+</html>
