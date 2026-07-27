@@ -456,7 +456,7 @@ function imgUrl(name, type) {
   const map   = type === 'producto' ? PRODUCTOS_MAP : CULTIVOS_MAP;
   const fname = map[name] || name.replace(/\s+/g,'_').replace(/[®©°()[\]]/g,'');
   const folder = type === 'producto' ? 'productos' : 'cultivos';
-  return IMG_BASE + '/' + folder + '/' + fname + '.png';
+  return IMG_BASE + '/' + folder + '/' + fname + '.webp';
 }
 
 function imgChip(name, type, emoji) {
