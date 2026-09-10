@@ -218,7 +218,7 @@ textarea::placeholder { color:var(--gray-400); }
 <div class="welcome-overlay" id="welcome-overlay">
   <div class="welcome-card">
     <div class="welcome-logo">PTI</div>
-    <div class="welcome-h">Pre-parrilla Octubre 2025</div>
+    <div class="welcome-h">Pre-parrilla Octubre 2026</div>
     <div class="welcome-p">Bienvenido al sistema de revisión de contenido mensual.<br>¿Quién va a revisar hoy?</div>
     <label class="welcome-label" for="reviewer-input">Tu nombre</label>
     <input class="welcome-input" id="reviewer-input" type="text" placeholder="Ej: José, Fabi…" autocomplete="off" oninput="document.getElementById('welcome-start').disabled=!this.value.trim()">
@@ -232,7 +232,7 @@ textarea::placeholder { color:var(--gray-400); }
     <div class="logo-mark">PTI</div>
     <div>
       <div class="header-title">Revisión de parrilla</div>
-      <div class="header-sub">Octubre 2025</div>
+      <div class="header-sub">Octubre 2026</div>
     </div>
   </div>
   <div class="header-right">
@@ -289,7 +289,7 @@ import { getFirestore, doc, setDoc, collection, getDocs, onSnapshot }
   from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
 
 const CLIENTE = "pti";
-const MES     = "octubre-2025";
+const MES     = "octubre-2026";
 
 const firebaseConfig = {
   apiKey: "AIzaSyBXXtUwnIcqJ4acxZIThuMWrnzDpLRf2ME",
@@ -927,6 +927,21 @@ function exportar() {
 }
 
 render();
+
+// ── Expose globals (needed because type="module" script isolates scope) ──
+window.startReview      = startReview;
+window.switchTab        = switchTab;
+window.navTo            = navTo;
+window.decide           = decide;
+window.showChange       = showChange;
+window.confirmChange    = confirmChange;
+window.resetLocal       = resetLocal;
+window.restart          = restart;
+window.exportar         = exportar;
+window.setFilter        = setFilter;
+window.setFilterReviewer= setFilterReviewer;
+window.renderResumen    = renderResumen;
+window.renderComentarios= renderComentarios;
 </script>
 </body>
 </html>
