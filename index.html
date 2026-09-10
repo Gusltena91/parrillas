@@ -389,9 +389,7 @@ function subscribeToDecisions() {
 window._fbSave = saveDecision;
 window._fbLoad = loadDecisions;
 window._fbSubscribe = subscribeToDecisions;
-</script>
 
-<script>
 // ── IMAGE MAPPING ─────────────────────────────────────────────────────────────
 // Base URL — change this to match your GitHub repo path
 const IMG_BASE = 'https://gusltena91.github.io/parrillas/img';
@@ -501,8 +499,7 @@ function imgChip(name, type, emoji) {
 // ── DATA ──────────────────────────────────────────────────────────────────────
 const piezas = [
   { id:"I3",  tema:"La calidad del cempasúchil",                              formato:"Imagen estática",  encuesta:false, cultivos:["Cempasuchil"],                                     productos:["Cinnacar","Gamma"],                                                    temas_contenido:["araña roja","trips","flores","calidad"],            guion:"🏵️ La calidad del cempasúchil se construye antes de que llegue a nuestras ofrendas. Araña roja y trips pueden comprometer el desarrollo y la calidad de las flores si no se manejan oportunamente." },
-  { id:"H1",  tema:"Bio Quitina — Biodefensor del suelo",                     formato:"Historia",          encuesta:false, cultivos:["Cebolla"],                                         productos:["Nutripro Bio Quitina"],                                                temas_contenido:["salud del suelo","biodefensores","inicio de ciclo"], guion:"Bio Quitina (con arquetipo de biodefensores del suelo)
-🌱 Un nuevo ciclo comienza desde abajo. Cuida el suelo desde el inicio." },
+  { id:"H1",  tema:"Bio Quitina — Biodefensor del suelo",                     formato:"Historia",          encuesta:false, cultivos:["Cebolla"],                                         productos:["Nutripro Bio Quitina"],                                                temas_contenido:["salud del suelo","biodefensores","inicio de ciclo"], guion:"Bio Quitina (con arquetipo de biodefensores del suelo). 🌱 Un nuevo ciclo comienza desde abajo. Cuida el suelo desde el inicio." },
   { id:"R1",  tema:"Cempasúchil: de la flor de temporada a la exportación",  formato:"Reel (video)",      encuesta:false, cultivos:["Ornamentales"],                                    productos:["Bio-Die","Natural King"],                                              temas_contenido:["cempasúchil","exportación","plagas","polinizadores"], guion:"El cempasúchil no solo viste altares, también exige calidad de exportación. Natural King derriba la plaga sin dejar residuos en la flor. Bio-Die suma control botánico, cuidando también a los polinizadores. Flor protegida, temporada asegurada. PTI, presente en cada etapa de tu producción." },
   { id:"R2",  tema:"Inicio del ciclo Otoño-Invierno",                        formato:"Reel (video)",      encuesta:false, cultivos:["Brocolí","Cebolla","Papa"],                        productos:["Enraizador","Trico-Bio"],                                              temas_contenido:["inicio de ciclo","raíz","hongos del suelo"],         guion:"Todo cultivo de otoño-invierno se juega el éxito en los primeros 15 días. Lo que pasa bajo tierra define lo que pasa en la cosecha. Enraizador impulsa el arranque y desarrollo de raíces desde el trasplante. Trico-Bio protege raíz y tallo frente a hongos del suelo. Empieza el ciclo con raíces fuertes. Empieza con PTI." },
   { id:"H2",  tema:"Gamma — Sácalas de su refugio",                          formato:"Historia",          encuesta:false, cultivos:["Aguacate"],                                        productos:["Gamma"],                                                               temas_contenido:["plagas","trips","manejo preventivo"],                guion:"Que tus plagas no jueguen a las escondidillas. Aplica Gamma y sácalas de su refugio. Con Ultrabee 🐝" },
@@ -926,22 +923,20 @@ function exportar() {
   const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'PTI_retroalimentacion_octubre.txt'; a.click();
 }
 
-render();
+// ── Expose all functions to global scope for onclick handlers (BEFORE render) ──
+window.startReview       = startReview;
+window.switchTab         = switchTab;
+window.navTo             = navTo;
+window.decide            = decide;
+window.showChange        = showChange;
+window.confirmChange     = confirmChange;
+window.resetLocal        = resetLocal;
+window.restart           = restart;
+window.exportar          = exportar;
+window.setFilter         = setFilter;
+window.setFilterReviewer = setFilterReviewer;
 
-// ── Expose globals (needed because type="module" script isolates scope) ──
-window.startReview      = startReview;
-window.switchTab        = switchTab;
-window.navTo            = navTo;
-window.decide           = decide;
-window.showChange       = showChange;
-window.confirmChange    = confirmChange;
-window.resetLocal       = resetLocal;
-window.restart          = restart;
-window.exportar         = exportar;
-window.setFilter        = setFilter;
-window.setFilterReviewer= setFilterReviewer;
-window.renderResumen    = renderResumen;
-window.renderComentarios= renderComentarios;
+render();
 </script>
 </body>
 </html>
